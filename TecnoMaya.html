@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>TecnoMaya PRO</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0b1220;color:#fff;font-family:Arial,sans-serif;padding-bottom:20px}
+header{background:#111827;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px #00000088}
+.logo{font-size:24px;font-weight:bold}.logo span{color:#00d4ff}
+.header-right{display:flex;gap:8px;flex-wrap:wrap}
+.container{padding:16px;max-width:1200px;margin:auto}
+.card{background:#111827;padding:16px;border-radius:14px;margin-bottom:16px;border:1px solid #1f2937}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0f172a;color:white;box-sizing:border-box;margin-top:8px;font-size:15px;font-family:Arial,sans-serif}
+select option{background:#0f172a}
+button{cursor:pointer;background:#00d4ff;color:#000;font-weight:bold;border:none;transition:opacity .15s}
+button:active{opacity:.7}
+.btn-red{background:#ef4444;color:#fff}
+.btn-green{background:#22c55e;color:#000}
+.btn-gray{background:#374151;color:#fff}
+.btn-small{padding:5px 10px;font-size:12px;width:auto;margin-top:0}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{padding:10px 8px;border-bottom:2px solid #1f2937;text-align:left;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 8px;border-bottom:1px solid #1f2937;font-size:13px;vertical-align:middle}
+tr:hover td{background:#1f293722}
+.badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:bold;white-space:nowrap}
+.badge-venta{background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff44}
+.badge-rep{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
+.badge-estado{background:#1e293b;color:#94a3b8;border:1px solid #374151}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.small{font-size:12px;color:#94a3b8}
+.kpi{font-size:26px;font-weight:bold;margin-top:4px;word-break:break-word}
+.kpi-label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.kpi-card{background:#111827;padding:16px;border-radius:14px;border:1px solid #1f2937;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.15}
+.kpi-accent::before{background:#00d4ff}.kpi-green::before{background:#22c55e}
+.kpi-yellow::before{background:#f59e0b}.kpi-purple::before{background:#a855f7}
+.alert-bajo{color:#ef4444;font-size:11px;font-weight:bold;margin-top:2px}
+.tbl-wrap{overflow-x:auto}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid #1f2937;padding-bottom:0}
+.tab{padding:10px 18px;border-radius:10px 10px 0 0;background:none;border:none;color:#94a3b8;font-size:14px;font-weight:bold;cursor:pointer;width:auto;margin:0;transition:all .15s}
+.tab.active{background:#111827;color:#00d4ff;border:1px solid #1f2937;border-bottom:1px solid #111827;margin-bottom:-1px}
+.section{display:none}.section.active{display:block}
+.ganancia-preview{background:#00e67622;border:1px solid #00e67644;border-radius:8px;padding:8px 12px;color:#00e676;font-size:13px;font-weight:bold;margin-top:8px;display:none}
+.db-status{font-size:10px;color:#22c55e;letter-spacing:1px}
+.spinner{text-align:center;padding:40px;color:#94a3b8}
+@keyframes spin{to{transform:rotate(360deg)}}
+.semana-row{background:#0f172a!important}
+.trend-up{color:#22c55e;font-size:11px}.trend-down{color:#ef4444;font-size:11px}
+h3{margin:0 0 12px 0;font-size:16px;color:#e2e8f0}
+@media(max-width:600px){
+  .grid{grid-template-columns:1fr 1fr}
+  .grid2{grid-template-columns:1fr}
+  th,td{padding:8px 5px;font-size:12px}
+  .kpi{font-size:20px}
+  header{padding:10px 12px}
+  .logo{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">TECNO<span>MAYA</span> PRO</div>
+    <div class="db-status" id="dbStatus">● Cargando...</div>
+  </div>
+  <div class="header-right">
+    <button class="btn-small btn-gray" onclick="exportar()" style="width:auto;padding:8px 14px">📤 Exportar</button>
+    <input type="file" id="importFile" style="display:none" accept=".json">
+    <button class="btn-small btn-gray" onclick="document.getElementById('importFile').click()" style="width:auto;padding:8px 14px">📥 Importar</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" onclick="showTab('operaciones')">🔧 Reparaciones</button>
+    <button class="tab" onclick="showTab('inventario')">📦 Inventario</button>
+    <button class="tab" onclick="showTab('gastos')">💸 Gastos</button>
+    <button class="tab" onclick="showTab('reportes')">📆 Reportes</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="sec-dashboard">
+    <div class="grid" id="kpiGrid"></div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📈 Ingresos últimos 7 días</h3>
+        <div id="chart7dias" style="display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:8px"></div>
+        <div id="chart7dias-labels" style="display:flex;gap:6px;margin-top:4px"></div>
+      </div>
+      <div class="card">
+        <h3>🏆 Top Productos</h3>
+        <div id="topProductos"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>🔧 Top Reparaciones</h3>
+        <div id="topReparaciones"></div>
+      </div>
+      <div class="card">
+        <h3>⚠️ Stock Bajo</h3>
+        <div id="stockBajoList"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📋 Últimas 5 Reparaciones</h3>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Producto</th><th>Cliente</th><th>Tipo</th><th>Ganancia</th><th>Estado</th><th>Fecha</th></tr></thead>
+        <tbody id="ultimas5"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERACIONES -->
+  <div class="section" id="sec-operaciones">
+    <div class="card">
+      <h3 id="formOpTitulo">➕ Nueva Reparación</h3>
+      <div class="grid2">
+        <div>
+          <label class="small">Tipo</label>
+          <select id="tipo" onchange="actualizarEstados()">
+            <option value="venta">Venta</option>
+            <option value="reparacion">Reparación</option>
+          </select>
+        </div>
+        <div>
+          <label class="small">Categoría</label>
+          <select id="categoria">
+            <option>Teléfonos</option><option>Accesorios</option>
+            <option>Reparación</option><option>Refacciones</option>
+          </select>
+        </div>
+        <div>
+          <label class="small">Producto / Servicio</label>
+          <input id="producto" placeholder="Ej: iPhone 15" list="sugerencias-prod">
+          <datalist id="sugerencias-prod"></datalist>
+        </div>
+        <div>
+          <label class="small">Cliente</label>
+          <input id="cliente" placeholder="Nombre del cliente" list="sugerencias-cli">
+          <datalist id="sugerencias-cli"></datalist>
+        </div>
+        <div>
+          <label class="small">Estado</label>
+          <select id="estado"></select>
+        </div>
+        <div>
+          <label class="small">Cantidad</label>
+          <input id="cantidad" type="number" value="1" min="1" oninput="calcPreview()">
+        </div>
+        <div>
+          <label class="small">Precio de venta (L)</label>
+          <input id="precio" type="number" placeholder="0" oninput="calcPreview()">
+        </div>
+        <div>
+          <label class="small">Costo / insumos (L)</label>
+          <input id="costo" type="number" placeholder="0" oninput="calcPreview()">
+        </div>
+        <div>
+          <label class="small">Fecha</label>
+          <input id="fecha-op" type="date">
+        </div>
+        <div>
+          <label class="small">Nota</label>
+          <input id="nota" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="ganancia-preview" id="ganPreview"></div>
+      <div class="flex" style="margin-top:12px">
+        <button onclick="guardarOperacion()" id="btnGuardarOp" style="width:auto;padding:10px 24px">✓ Guardar Reparación</button>
+        <button class="btn-gray" onclick="cancelarEditOp()" id="btnCancelarOp" style="display:none;width:auto;padding:10px 18px">✕ Cancelar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flex" style="margin-bottom:8px;justify-content:space-between">
+        <h3 style="margin:0">📋 Historial de Reparaciones</h3>
+        <div class="flex" style="gap:8px">
+          <select id="filtroTipo" onchange="renderOperaciones()" style="width:auto;margin:0;padding:6px 10px;font-size:13px">
+            <option value="">Todos</option><option value="venta">Ventas</option><option value="reparacion">Reparaciones</option>
+          </select>
+          <input id="filtroFechaDesde" type="date" onchange="renderOperaciones()" style="width:auto;margin:0;padding:6px 10px;font-size:13px" placeholder="Desde">
+          <input id="filtroFechaHasta" type="date" onchange="renderOperaciones()" style="width:auto;margin:0;padding:6px 10px;font-size:13px" placeholder="Hasta">
+        </div>
+      </div>
+      <input id="buscarOp" placeholder="🔍 Buscar reparación..." oninput="renderOperaciones()" style="margin-bottom:8px">
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Fecha</th><th>Producto</th><th>Cliente</th><th>Tipo</th><th>Qty</th><th>Precio</th><th>Ganancia</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tablaOps"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTARIO -->
+  <div class="section" id="sec-inventario">
+    <div class="card">
+      <h3 id="formInvTitulo">📦 Agregar Producto</h3>
+      <div class="grid2">
+        <div><label class="small">Nombre</label><input id="invNombre" placeholder="Ej: Samsung A55"></div>
+        <div><label class="small">Categoría</label>
+          <select id="invCat"><option>Teléfonos</option><option>Accesorios</option><option>Refacciones</option></select>
+        </div>
+        <div><label class="small">Stock</label><input id="invStock" type="number" placeholder="0" min="0"></div>
+        <div><label class="small">Costo (L)</label><input id="invCosto" type="number" placeholder="0"></div>
+        <div><label class="small">Precio venta (L)</label><input id="invPrecio" type="number" placeholder="0"></div>
+        <div><label class="small">Stock mínimo (alerta)</label><input id="invMin" type="number" placeholder="2" value="2"></div>
+      </div>
+      <div class="flex" style="margin-top:8px">
+        <button onclick="guardarInventario()" id="btnGuardarInv" style="width:auto;padding:10px 24px">✓ Agregar</button>
+        <button class="btn-gray" onclick="cancelarEditInv()" id="btnCancelarInv" style="display:none;width:auto;padding:10px 18px">✕ Cancelar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flex" style="margin-bottom:8px;justify-content:space-between">
+        <h3 style="margin:0">📋 Productos</h3>
+        <div class="flex">
+          <select id="filtroInvCat" onchange="renderInventario()" style="width:auto;margin:0;padding:6px 10px;font-size:13px">
+            <option value="">Todas</option><option>Teléfonos</option><option>Accesorios</option><option>Refacciones</option>
+          </select>
+        </div>
+      </div>
+      <input id="buscarInv" placeholder="🔍 Buscar producto..." oninput="renderInventario()">
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Margen</th><th></th></tr></thead>
+        <tbody id="tablaInv"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GASTOS -->
+  <div class="section" id="sec-gastos">
+    <div class="card">
+      <h3>💸 Registrar Gasto</h3>
+      <div class="grid2">
+        <div><label class="small">Descripción</label><input id="gastoDesc" placeholder="Ej: Renta, herramientas..."></div>
+        <div><label class="small">Monto (L)</label><input id="gastoMonto" type="number" placeholder="0"></div>
+        <div><label class="small">Categoría</label>
+          <select id="gastoCat"><option>Operativo</option><option>Renta</option><option>Herramientas</option><option>Repuestos</option><option>Otros</option></select>
+        </div>
+        <div><label class="small">Fecha</label><input id="gastoFecha" type="date"></div>
+      </div>
+      <button onclick="guardarGasto()" style="width:auto;padding:10px 24px;margin-top:8px">✓ Guardar Gasto</button>
+    </div>
+    <div class="card">
+      <h3>📋 Historial de Gastos</h3>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th></th></tr></thead>
+        <tbody id="tablaGastos"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTES -->
+  <div class="section" id="sec-reportes">
+    <div class="card">
+      <div class="flex" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0">📆 Reportes Semanales</h3>
+        <div class="flex">
+          <select id="reporteMes" onchange="renderReportes()" style="width:auto;margin:0;padding:6px 10px;font-size:13px"></select>
+        </div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table><thead><tr><th>Semana</th><th>Ing. Ventas</th><th>Gan. Ventas</th><th>Ing. Reparac.</th><th>Gan. Reparac.</th><th>Gastos</th><th>Gan. Neta</th><th>Ops</th></tr></thead>
+        <tbody id="tablaReportes"></tbody></table>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>🏷 Ganancia por Categoría</h3>
+        <div id="repCategorias"></div>
+      </div>
+      <div class="card">
+        <h3>👤 Top Clientes</h3>
+        <div id="repClientes"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// INDEXEDDB
+// ═══════════════════════════════════════════════════════════
+let _db = null;
+const DB_NAME = "tecnomaya_pro", DB_VER = 1;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    if(_db) return res(_db);
+    const r = indexedDB.open(DB_NAME, DB_VER);
+    r.onupgradeneeded = e => {
+      const db = e.target.result;
+      ["operaciones","inventario","gastos"].forEach(s=>{
+        if(!db.objectStoreNames.contains(s))
+          db.createObjectStore(s,{keyPath:"id"});
+      });
+    };
+    r.onsuccess = e => { _db = e.target.result; res(_db); };
+    r.onerror   = e => rej(e.target.error);
+  });
+}
+const dbAll = async s => {
+  const db = await openDB();
+  return new Promise((res,rej)=>{
+    const r = db.transaction(s,"readonly").objectStore(s).getAll();
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+};
+const dbPut = async(s,rec) => {
+  const db = await openDB();
+  return new Promise((res,rej)=>{
+    const r = db.transaction(s,"readwrite").objectStore(s).put(rec);
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+};
+const dbDel = async(s,id) => {
+  const db = await openDB();
+  return new Promise((res,rej)=>{
+    const r = db.transaction(s,"readwrite").objectStore(s).delete(id);
+    r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);
+  });
+};
+const dbBulk = async(s,rows) => {
+  const db = await openDB();
+  return new Promise((res,rej)=>{
+    const tx = db.transaction(s,"readwrite"), os = tx.objectStore(s);
+    rows.forEach(r=>os.put(r));
+    tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error);
+  });
+};
+
+// ═══════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════════
+let OPS=[], INV=[], GASTOS=[];
+let editingOpId=null, editingInvId=null;
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const money = n => "L "+Number(n||0).toLocaleString("es-HN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc   = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const todayStr = () => new Date().toISOString().split("T")[0];
+const fmtDate  = s => s ? new Date(s+"T12:00:00").toLocaleDateString("es-HN",{day:"2-digit",month:"short",year:"2-digit"}) : "-";
+
+const ESTADOS_VENTA    = ["Completado","Cancelado"];
+const ESTADOS_REPARACION = ["Recibido","Diagnosticando","Esperando repuesto","Reparando","Listo","Entregado"];
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
+function showTab(t){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById("sec-"+t).classList.add("active");
+  event.target.classList.add("active");
+  if(t==="dashboard")  renderDashboard();
+  if(t==="operaciones"){renderOperaciones();actualizarSugerencias();}
+  if(t==="inventario") renderInventario();
+  if(t==="gastos")     renderGastos();
+  if(t==="reportes")   {poblarMeses();renderReportes();}
+}
+
+// ═══════════════════════════════════════════════════════════
+// ESTADOS DINÁMICOS
+// ═══════════════════════════════════════════════════════════
+function actualizarEstados(){
+  const sel = document.getElementById("estado");
+  const t   = document.getElementById("tipo").value;
+  const list = t==="reparacion" ? ESTADOS_REPARACION : ESTADOS_VENTA;
+  sel.innerHTML = list.map(e=>`<option>${e}</option>`).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// PREVIEW GANANCIA
+// ═══════════════════════════════════════════════════════════
+function calcPreview(){
+  const p = parseFloat(document.getElementById("precio")?.value||0);
+  const c = parseFloat(document.getElementById("costo")?.value||0);
+  const q = parseFloat(document.getElementById("cantidad")?.value||1);
+  const el = document.getElementById("ganPreview");
+  if(el && p){
+    el.style.display="block";
+    el.textContent = `Ganancia estimada: ${money((p-c)*q)}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SUGERENCIAS AUTOCOMPLETE
+// ═══════════════════════════════════════════════════════════
+function actualizarSugerencias(){
+  const prods = [...new Set(OPS.map(o=>o.producto).filter(Boolean))];
+  const clis  = [...new Set(OPS.map(o=>o.cliente).filter(Boolean))];
+  const dp = document.getElementById("sugerencias-prod");
+  const dc = document.getElementById("sugerencias-cli");
+  if(dp) dp.innerHTML = prods.map(p=>`<option value="${esc(p)}">`).join("");
+  if(dc) dc.innerHTML = clis.map(c=>`<option value="${esc(c)}">`).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// GUARDAR OPERACIÓN
+// ═══════════════════════════════════════════════════════════
+async function guardarOperacion(){
+  const prod   = document.getElementById("producto").value.trim();
+  const precio = parseFloat(document.getElementById("precio").value||0);
+  const costo  = parseFloat(document.getElementById("costo").value||0);
+  if(!prod||!precio){ alert("Completa producto y precio."); return; }
+
+  const rec = {
+    id:       editingOpId || Date.now(),
+    tipo:     document.getElementById("tipo").value,
+    producto: prod,
+    categoria:document.getElementById("categoria").value,
+    cliente:  document.getElementById("cliente").value.trim(),
+    estado:   document.getElementById("estado").value,
+    cantidad: parseInt(document.getElementById("cantidad").value||1),
+    precio, costo,
+    nota:     document.getElementById("nota").value.trim(),
+    fecha:    document.getElementById("fecha-op").value || todayStr(),
+  };
+
+  // Descontar stock solo en nueva venta (no en edición)
+  if(!editingOpId && rec.tipo==="venta"){
+    const item = INV.find(i=>i.nombre.toLowerCase()===rec.producto.toLowerCase());
+    if(item){ item.stock=Math.max(0,item.stock-rec.cantidad); await dbPut("inventario",item); }
+  }
+
+  await dbPut("operaciones",rec);
+  if(editingOpId){ OPS=OPS.map(o=>o.id===editingOpId?rec:o); }
+  else { OPS.push(rec); }
+
+  limpiarFormOp();
+  actualizarSugerencias();
+  renderDashboard();
+  renderOperaciones();
+  actualizarDBStatus();
+}
+
+function limpiarFormOp(){
+  editingOpId=null;
+  ["producto","cliente","cantidad","precio","costo","nota"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value = id==="cantidad"?"1":"";
+  });
+  document.getElementById("fecha-op").value=todayStr();
+  document.getElementById("ganPreview").style.display="none";
+  document.getElementById("formOpTitulo").textContent="➕ Nueva Reparación";
+  document.getElementById("btnGuardarOp").textContent="✓ Guardar Reparación";
+  document.getElementById("btnCancelarOp").style.display="none";
+}
+
+function cancelarEditOp(){ limpiarFormOp(); }
+
+function editarOperacion(id){
+  const op = OPS.find(o=>o.id===id);
+  if(!op) return;
+  showTab2("operaciones");
+  editingOpId = id;
+  document.getElementById("tipo").value     = op.tipo;
+  actualizarEstados();
+  document.getElementById("categoria").value= op.categoria||"Teléfonos";
+  document.getElementById("producto").value = op.producto;
+  document.getElementById("cliente").value  = op.cliente||"";
+  document.getElementById("estado").value   = op.estado||"";
+  document.getElementById("cantidad").value = op.cantidad;
+  document.getElementById("precio").value   = op.precio;
+  document.getElementById("costo").value    = op.costo;
+  document.getElementById("nota").value     = op.nota||"";
+  document.getElementById("fecha-op").value = op.fecha||todayStr();
+  document.getElementById("formOpTitulo").textContent="✏️ Editar Reparación";
+  document.getElementById("btnGuardarOp").textContent="💾 Actualizar";
+  document.getElementById("btnCancelarOp").style.display="inline-block";
+  calcPreview();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function eliminarOperacion(id){
+  if(!confirm("¿Eliminar esta reparación?")) return;
+  await dbDel("operaciones",id);
+  OPS=OPS.filter(o=>o.id!==id);
+  renderOperaciones(); renderDashboard(); actualizarDBStatus();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER OPERACIONES
+// ═══════════════════════════════════════════════════════════
+function renderOperaciones(){
+  const q    = (document.getElementById("buscarOp")?.value||"").toLowerCase();
+  const ft   = document.getElementById("filtroTipo")?.value||"";
+  const fd   = document.getElementById("filtroFechaDesde")?.value||"";
+  const fh   = document.getElementById("filtroFechaHasta")?.value||"";
+  const tbody= document.getElementById("tablaOps");
+  if(!tbody) return;
+
+  let list = OPS
+    .filter(o=>!ft||o.tipo===ft)
+    .filter(o=>!fd||o.fecha>=fd)
+    .filter(o=>!fh||o.fecha<=fh)
+    .filter(o=>o.producto.toLowerCase().includes(q)||(o.cliente||"").toLowerCase().includes(q))
+    .sort((a,b)=>b.id-a.id);
+
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="9" style="color:#94a3b8;text-align:center;padding:20px">Sin registros</td></tr>`; return; }
+
+  tbody.innerHTML = list.map(o=>{
+    const g=(o.precio-o.costo)*o.cantidad;
+    const tc=o.tipo==="venta"?"badge-venta":"badge-rep";
+    return `<tr>
+      <td>${fmtDate(o.fecha)}</td>
+      <td><div style="font-weight:600">${esc(o.producto)}</div>${o.nota?`<div class="small">${esc(o.nota)}</div>`:""}</td>
+      <td>${esc(o.cliente)||"-"}</td>
+      <td><span class="badge ${tc}">${o.tipo}</span></td>
+      <td>${o.cantidad}</td>
+      <td>${money(o.precio*o.cantidad)}</td>
+      <td style="color:${g>=0?"#22c55e":"#ef4444"};font-weight:700">${money(g)}</td>
+      <td><span class="badge badge-estado">${esc(o.estado)||"-"}</span></td>
+      <td><div class="flex" style="gap:4px">
+        <button class="btn-small btn-gray" onclick="editarOperacion(${o.id})">✏️</button>
+        <button class="btn-small btn-red"  onclick="eliminarOperacion(${o.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// INVENTARIO
+// ═══════════════════════════════════════════════════════════
+async function guardarInventario(){
+  const nombre = document.getElementById("invNombre").value.trim();
+  const precio = parseFloat(document.getElementById("invPrecio").value||0);
+  if(!nombre||!precio){ alert("Completa nombre y precio."); return; }
+
+  const rec = {
+    id:       editingInvId || Date.now(),
+    nombre,
+    categoria:document.getElementById("invCat").value,
+    stock:    parseInt(document.getElementById("invStock").value||0),
+    costo:    parseFloat(document.getElementById("invCosto").value||0),
+    precio,
+    minStock: parseInt(document.getElementById("invMin").value||2),
+  };
+
+  await dbPut("inventario",rec);
+  if(editingInvId){ INV=INV.map(i=>i.id===editingInvId?rec:i); }
+  else { INV.push(rec); }
+
+  limpiarFormInv();
+  renderInventario(); renderDashboard(); actualizarDBStatus();
+}
+
+function limpiarFormInv(){
+  editingInvId=null;
+  ["invNombre","invStock","invCosto","invPrecio"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+  document.getElementById("invMin").value="2";
+  document.getElementById("formInvTitulo").textContent="📦 Agregar Producto";
+  document.getElementById("btnGuardarInv").textContent="✓ Agregar";
+  document.getElementById("btnCancelarInv").style.display="none";
+}
+function cancelarEditInv(){ limpiarFormInv(); }
+
+function editarInv(id){
+  showTab2("inventario");
+  const item=INV.find(i=>i.id===id); if(!item) return;
+  editingInvId=id;
+  document.getElementById("invNombre").value =item.nombre;
+  document.getElementById("invCat").value    =item.categoria||"Teléfonos";
+  document.getElementById("invStock").value  =item.stock;
+  document.getElementById("invCosto").value  =item.costo;
+  document.getElementById("invPrecio").value =item.precio;
+  document.getElementById("invMin").value    =item.minStock||2;
+  document.getElementById("formInvTitulo").textContent="✏️ Editar Producto";
+  document.getElementById("btnGuardarInv").textContent="💾 Actualizar";
+  document.getElementById("btnCancelarInv").style.display="inline-block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function eliminarInv(id){
+  if(!confirm("¿Eliminar producto?")) return;
+  await dbDel("inventario",id);
+  INV=INV.filter(i=>i.id!==id);
+  renderInventario(); renderDashboard(); actualizarDBStatus();
+}
+
+async function ajustarStock(id,delta){
+  const item=INV.find(i=>i.id===id); if(!item) return;
+  item.stock=Math.max(0,item.stock+delta);
+  await dbPut("inventario",item);
+  renderInventario(); renderDashboard();
+}
+
+function renderInventario(){
+  const q   =(document.getElementById("buscarInv")?.value||"").toLowerCase();
+  const cat = document.getElementById("filtroInvCat")?.value||"";
+  const tbody=document.getElementById("tablaInv"); if(!tbody) return;
+
+  let list=INV
+    .filter(i=>!cat||i.categoria===cat)
+    .filter(i=>i.nombre.toLowerCase().includes(q));
+
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="7" style="color:#94a3b8;text-align:center;padding:20px">Sin productos</td></tr>`; return; }
+
+  tbody.innerHTML=list.map(i=>{
+    const min=i.minStock||2;
+    const bajo=i.stock<=min;
+    return `<tr>
+      <td><div style="font-weight:600">${esc(i.nombre)}</div>
+        ${bajo?`<div class="alert-bajo">⚠ Stock bajo (mín ${min})</div>`:""}</td>
+      <td>${esc(i.categoria||"")}</td>
+      <td>
+        <div class="flex" style="gap:4px;align-items:center">
+          <button class="btn-small" style="background:#374151;color:#fff;padding:3px 8px" onclick="ajustarStock(${i.id},-1)">−</button>
+          <span style="font-weight:700;color:${bajo?"#ef4444":"#e2e8f0"};min-width:24px;text-align:center">${i.stock}</span>
+          <button class="btn-small" style="background:#374151;color:#fff;padding:3px 8px" onclick="ajustarStock(${i.id},1)">+</button>
+        </div>
+      </td>
+      <td>${money(i.costo)}</td>
+      <td>${money(i.precio)}</td>
+      <td style="color:#22c55e;font-weight:700">${money(i.precio-i.costo)}</td>
+      <td><div class="flex" style="gap:4px">
+        <button class="btn-small btn-gray" onclick="editarInv(${i.id})">✏️</button>
+        <button class="btn-small btn-red"  onclick="eliminarInv(${i.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// GASTOS
+// ═══════════════════════════════════════════════════════════
+async function guardarGasto(){
+  const desc =document.getElementById("gastoDesc").value.trim();
+  const monto=parseFloat(document.getElementById("gastoMonto").value||0);
+  if(!desc||!monto){ alert("Completa descripción y monto."); return; }
+  const rec={
+    id:Date.now(), descripcion:desc,
+    categoria:document.getElementById("gastoCat").value,
+    monto, fecha:document.getElementById("gastoFecha").value||todayStr()
+  };
+  await dbPut("gastos",rec);
+  GASTOS.push(rec);
+  document.getElementById("gastoDesc").value="";
+  document.getElementById("gastoMonto").value="";
+  renderGastos(); renderDashboard(); actualizarDBStatus();
+}
+
+async function eliminarGasto(id){
+  if(!confirm("¿Eliminar gasto?")) return;
+  await dbDel("gastos",id);
+  GASTOS=GASTOS.filter(g=>g.id!==id);
+  renderGastos(); renderDashboard();
+}
+
+function renderGastos(){
+  const tbody=document.getElementById("tablaGastos"); if(!tbody) return;
+  if(!GASTOS.length){ tbody.innerHTML=`<tr><td colspan="5" style="color:#94a3b8;text-align:center;padding:20px">Sin gastos</td></tr>`; return; }
+  tbody.innerHTML=[...GASTOS].sort((a,b)=>b.id-a.id).map(g=>`
+    <tr>
+      <td>${fmtDate(g.fecha)}</td>
+      <td>${esc(g.descripcion)}</td>
+      <td><span class="badge badge-estado">${esc(g.categoria||"")}</span></td>
+      <td style="color:#ef4444;font-weight:700">${money(g.monto)}</td>
+      <td><button class="btn-small btn-red" onclick="eliminarGasto(${g.id})">🗑</button></td>
+    </tr>`).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDashboard(){
+  const now=new Date();
+  const wa=new Date(now); wa.setDate(now.getDate()-7);
+  const twa=new Date(now); twa.setDate(now.getDate()-14);
+
+  const tw=OPS.filter(o=>new Date(o.fecha+"T12:00:00")>=wa);
+  const lw=OPS.filter(o=>{const d=new Date(o.fecha+"T12:00:00");return d>=twa&&d<wa;});
+
+  const calc=list=>{
+    const v=list.filter(o=>o.tipo==="venta"), r=list.filter(o=>o.tipo==="reparacion");
+    return{
+      ingV:v.reduce((a,o)=>a+o.precio*o.cantidad,0),
+      ganV:v.reduce((a,o)=>a+(o.precio-o.costo)*o.cantidad,0),
+      ingR:r.reduce((a,o)=>a+o.precio*o.cantidad,0),
+      ganR:r.reduce((a,o)=>a+(o.precio-o.costo)*o.cantidad,0),
+      tx:list.length,
+    };
+  };
+  const t=calc(tw), l=calc(lw);
+  const pct=(a,b)=>b===0?null:((a-b)/b)*100;
+  const trendHTML=(v,p)=>{
+    if(p===null) return "";
+    return p>=0?`<span class="trend-up">▲ ${Math.abs(p).toFixed(1)}%</span>`:`<span class="trend-down">▼ ${Math.abs(p).toFixed(1)}%</span>`;
+  };
+  const totalGastos=GASTOS.reduce((a,g)=>a+g.monto,0);
+  const ganNeta=t.ganV+t.ganR;
+
+  document.getElementById("kpiGrid").innerHTML=`
+    <div class="kpi-card kpi-accent">
+      <div class="kpi-label">Ingresos Semana</div>
+      <div class="kpi" style="color:#00d4ff">${money(t.ingV+t.ingR)}</div>
+      ${trendHTML(t.ingV+t.ingR,pct(t.ingV+t.ingR,l.ingV+l.ingR))}
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">Ganancia Semana</div>
+      <div class="kpi" style="color:#22c55e">${money(ganNeta)}</div>
+      ${trendHTML(ganNeta,pct(ganNeta,l.ganV+l.ganR))}
+    </div>
+    <div class="kpi-card kpi-yellow">
+      <div class="kpi-label">Gastos Totales</div>
+      <div class="kpi" style="color:#f59e0b">${money(totalGastos)}</div>
+    </div>
+    <div class="kpi-card kpi-purple">
+      <div class="kpi-label">Gan. Neta (−Gastos)</div>
+      <div class="kpi" style="color:#a855f7">${money(ganNeta-totalGastos)}</div>
+    </div>`;
+
+  // Gráfico 7 días
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date(now); d.setDate(now.getDate()-(6-i));
+    const ds=d.toISOString().split("T")[0];
+    return{label:d.toLocaleDateString("es-HN",{weekday:"short"}).slice(0,3),
+           value:OPS.filter(o=>o.fecha===ds).reduce((a,o)=>a+o.precio*o.cantidad,0)};
+  });
+  const maxV=Math.max(...days.map(d=>d.value),1);
+  document.getElementById("chart7dias").innerHTML=days.map(d=>`
+    <div style="flex:1;height:${Math.max((d.value/maxV)*76,2)}px;
+      background:linear-gradient(180deg,#00d4ff,#00d4ff66);border-radius:3px 3px 0 0;
+      box-shadow:0 0 6px #00d4ff44" title="${money(d.value)}"></div>`).join("");
+  document.getElementById("chart7dias-labels").innerHTML=days.map(d=>`
+    <div style="flex:1;text-align:center;font-size:10px;color:#94a3b8">${d.label}</div>`).join("");
+
+  // Top productos
+  const pm={};
+  OPS.filter(o=>o.tipo==="venta").forEach(o=>{pm[o.producto]=(pm[o.producto]||0)+(o.precio-o.costo)*o.cantidad;});
+  const topP=Object.entries(pm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById("topProductos").innerHTML=!topP.length?`<div class="small">Sin datos</div>`:
+    topP.map(([n,g],i)=>{
+      const p=topP[0][1]===0?0:(g/topP[0][1])*100;
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+          <span style="color:#94a3b8">${i+1}. ${esc(n)}</span>
+          <span style="color:#22c55e;font-weight:700">${money(g)}</span>
+        </div>
+        <div style="height:4px;background:#1e293b;border-radius:4px">
+          <div style="width:${p}%;height:100%;background:linear-gradient(90deg,#22c55e,#00d4ff);border-radius:4px"></div>
+        </div>
+      </div>`;
+    }).join("");
+
+  // Top reparaciones
+  const rm={};
+  OPS.filter(o=>o.tipo==="reparacion").forEach(o=>{rm[o.producto]=(rm[o.producto]||0)+(o.precio-o.costo)*o.cantidad;});
+  const topR=Object.entries(rm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById("topReparaciones").innerHTML=!topR.length?`<div class="small">Sin datos</div>`:
+    topR.map(([n,g],i)=>`
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;font-size:13px">
+        <span style="color:#94a3b8">${i+1}. ${esc(n)}</span>
+        <span style="color:#f59e0b;font-weight:700">${money(g)}</span>
+      </div>`).join("");
+
+  // Stock bajo
+  const bajo=INV.filter(i=>i.stock<=(i.minStock||2));
+  document.getElementById("stockBajoList").innerHTML=!bajo.length?`<div style="color:#22c55e;font-size:13px">✅ Todo en orden</div>`:
+    bajo.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;font-size:13px">
+      <span>${esc(i.nombre)}</span>
+      <span class="alert-bajo">Stock: ${i.stock}</span>
+    </div>`).join("");
+
+  // Últimas 5
+  const ul=[...OPS].sort((a,b)=>b.id-a.id).slice(0,5);
+  document.getElementById("ultimas5").innerHTML=!ul.length?`<tr><td colspan="6" style="color:#94a3b8;text-align:center">Sin reparaciones</td></tr>`:
+    ul.map(o=>{
+      const g=(o.precio-o.costo)*o.cantidad;
+      return `<tr>
+        <td>${esc(o.producto)}</td>
+        <td>${esc(o.cliente)||"-"}</td>
+        <td><span class="badge ${o.tipo==="venta"?"badge-venta":"badge-rep"}">${o.tipo}</span></td>
+        <td style="color:${g>=0?"#22c55e":"#ef4444"};font-weight:700">${money(g)}</td>
+        <td><span class="badge badge-estado">${esc(o.estado)||"-"}</span></td>
+        <td>${fmtDate(o.fecha)}</td>
+      </tr>`;
+    }).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// REPORTES SEMANALES
+// ═══════════════════════════════════════════════════════════
+function poblarMeses(){
+  const meses=[...new Set(OPS.map(o=>o.fecha?o.fecha.slice(0,7):""))].filter(Boolean).sort().reverse();
+  const sel=document.getElementById("reporteMes"); if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML=`<option value="">Todos los meses</option>`+
+    meses.map(m=>`<option value="${m}" ${m===cur?"selected":""}>${m}</option>`).join("");
+}
+
+function wkStart(dateStr){
+  const d=new Date(dateStr+"T12:00:00"), s=new Date(d);
+  s.setDate(d.getDate()-d.getDay());
+  return s.toISOString().split("T")[0];
+}
+
+function renderReportes(){
+  const mesF=document.getElementById("reporteMes")?.value||"";
+  let ops=OPS.filter(o=>!mesF||( o.fecha&&o.fecha.startsWith(mesF)));
+
+  const wm={};
+  ops.forEach(o=>{
+    const w=wkStart(o.fecha||todayStr());
+    if(!wm[w]) wm[w]=[];
+    wm[w].push(o);
+  });
+
+  const weeks=Object.entries(wm).sort((a,b)=>b[0].localeCompare(a[0])).map(([start,items])=>{
+    const v=items.filter(i=>i.tipo==="venta"), r=items.filter(i=>i.tipo==="reparacion");
+    const end=new Date(start+"T12:00:00"); end.setDate(end.getDate()+6);
+    const endStr=end.toISOString().split("T")[0];
+    const gastSem=GASTOS.filter(g=>g.fecha>=start&&g.fecha<=endStr).reduce((a,g)=>a+g.monto,0);
+    const ganV=v.reduce((a,i)=>a+(i.precio-i.costo)*i.cantidad,0);
+    const ganR=r.reduce((a,i)=>a+(i.precio-i.costo)*i.cantidad,0);
+    return{start,endStr,
+      ingV:v.reduce((a,i)=>a+i.precio*i.cantidad,0), ganV,
+      ingR:r.reduce((a,i)=>a+i.precio*i.cantidad,0), ganR,
+      gastSem, ganNeta:ganV+ganR-gastSem, ops:items.length};
+  });
+
+  const tbody=document.getElementById("tablaReportes"); if(!tbody) return;
+  tbody.innerHTML=!weeks.length?`<tr><td colspan="8" style="color:#94a3b8;text-align:center;padding:20px">Sin datos</td></tr>`:
+    weeks.map(w=>`<tr>
+      <td style="font-weight:700;font-size:11px;color:#00d4ff;white-space:nowrap">
+        ${fmtDate(w.start)}<br><span style="color:#94a3b8">al ${fmtDate(w.endStr)}</span></td>
+      <td>${money(w.ingV)}</td>
+      <td style="color:#22c55e;font-weight:700">${money(w.ganV)}</td>
+      <td>${money(w.ingR)}</td>
+      <td style="color:#f59e0b;font-weight:700">${money(w.ganR)}</td>
+      <td style="color:#ef4444">${money(w.gastSem)}</td>
+      <td style="color:${w.ganNeta>=0?"#22c55e":"#ef4444"};font-weight:800">${money(w.ganNeta)}</td>
+      <td style="color:#94a3b8;text-align:center">${w.ops}</td>
+    </tr>`).join("");
+
+  // Ganancia por categoría
+  const cm={};
+  ops.filter(o=>o.tipo==="venta").forEach(o=>{cm[o.categoria]=(cm[o.categoria]||0)+(o.precio-o.costo)*o.cantidad;});
+  const catTotal=Object.values(cm).reduce((a,b)=>a+b,0);
+  document.getElementById("repCategorias").innerHTML=!Object.keys(cm).length?`<div class="small">Sin datos</div>`:
+    Object.entries(cm).map(([cat,val])=>{
+      const p=catTotal===0?0:(val/catTotal)*100;
+      const color=cat==="Teléfonos"?"#00d4ff":cat==="Accesorios"?"#a855f7":"#f59e0b";
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+          <span>${esc(cat)}</span>
+          <span style="color:${color};font-weight:700">${money(val)} <span style="color:#94a3b8;font-weight:400;font-size:11px">(${p.toFixed(1)}%)</span></span>
+        </div>
+        <div style="height:5px;background:#1e293b;border-radius:4px">
+          <div style="width:${p}%;height:100%;background:${color};border-radius:4px"></div>
+        </div>
+      </div>`;
+    }).join("");
+
+  // Top clientes
+  const clm={};
+  ops.filter(o=>o.cliente).forEach(o=>{
+    const k=o.cliente;
+    if(!clm[k]) clm[k]={gasto:0,ops:0};
+    clm[k].gasto+=(o.precio-o.costo)*o.cantidad;
+    clm[k].ops++;
+  });
+  const topCli=Object.entries(clm).sort((a,b)=>b[1].gasto-a[1].gasto).slice(0,8);
+  document.getElementById("repClientes").innerHTML=!topCli.length?`<div class="small">Sin datos</div>`:
+    topCli.map(([n,d],i)=>`
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1f2937;font-size:13px">
+        <span style="color:#94a3b8">${i+1}. ${esc(n)}</span>
+        <span><span style="color:#22c55e;font-weight:700">${money(d.gasto)}</span> <span class="small">(${d.ops} ops)</span></span>
+      </div>`).join("");
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════════
+function exportar(){
+  const data={operaciones:OPS, inventario:INV, gastos:GASTOS, exportado:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="tecnomaya_backup_"+todayStr()+".json";
+  a.click();
+}
+
+document.getElementById("importFile").addEventListener("change",async function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async function(evt){
+    try{
+      const data=JSON.parse(evt.target.result);
+      OPS    = data.operaciones||[];
+      INV    = data.inventario||[];
+      GASTOS = data.gastos||[];
+      await Promise.all([
+        dbBulk("operaciones",OPS),
+        dbBulk("inventario",INV),
+        dbBulk("gastos",GASTOS),
+      ]);
+      actualizarDBStatus();
+      renderDashboard();
+      alert("✅ Backup importado correctamente ("+OPS.length+" ops, "+INV.length+" productos)");
+    }catch(err){ alert("❌ Error al importar: "+err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value="";
+});
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function showTab2(t){
+  document.querySelectorAll(".tab").forEach(b=>{
+    b.classList.toggle("active", b.textContent.toLowerCase().includes(
+      t==="operaciones"?"oper":t==="inventario"?"inven":t==="gastos"?"gast":t==="reportes"?"repor":"dash"
+    ));
+  });
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById("sec-"+t).classList.add("active");
+}
+
+function actualizarDBStatus(){
+  document.getElementById("dbStatus").textContent=
+    `● ${OPS.length} ops · ${INV.length} productos · ${GASTOS.length} gastos`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById("fecha-op").value   = todayStr();
+document.getElementById("gastoFecha").value = todayStr();
+actualizarEstados();
+
+// Spinner de carga superpuesto — NO toca el DOM del dashboard
+const spinnerEl = document.createElement("div");
+spinnerEl.id = "loadingOverlay";
+spinnerEl.style.cssText = "position:fixed;inset:0;background:#0b1220;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px";
+spinnerEl.innerHTML = `<div style="width:44px;height:44px;border:3px solid #1f2937;border-top-color:#00d4ff;border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="color:#94a3b8;font-size:14px;letter-spacing:2px">CARGANDO...</div>`;
+document.body.appendChild(spinnerEl);
+
+(async()=>{
+  try{
+    const [o,i,g] = await Promise.all([dbAll("operaciones"),dbAll("inventario"),dbAll("gastos")]);
+    OPS=o; INV=i; GASTOS=g;
+    actualizarDBStatus();
+    renderDashboard();
+  }catch(err){
+    spinnerEl.innerHTML=`
+      <div style="text-align:center;padding:40px;color:#ef4444;max-width:320px">
+        <div style="font-size:40px">⚠️</div>
+        <div style="margin-top:12px;font-size:15px;font-weight:bold">Error de base de datos</div>
+        <div style="margin-top:8px;color:#94a3b8;font-size:13px">${esc(err.message)}</div>
+        <div style="margin-top:12px;color:#94a3b8;font-size:12px">Abre este archivo en Safari normal, no en modo privado.</div>
+        <button onclick="location.reload()" style="margin-top:16px;width:auto;padding:10px 24px">🔄 Reintentar</button>
+      </div>`;
+    return;
+  }
+  // Quitar spinner una vez cargado
+  spinnerEl.remove();
+})();
+</script>
+</body>
+</html>
